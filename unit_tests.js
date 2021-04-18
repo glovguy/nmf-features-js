@@ -1,4 +1,4 @@
-const { Features, Surveys } = require('./features');
+const { Features, Surveys } = require('./nlp/models/features');
 
 const testSurvey = new Surveys(
     [

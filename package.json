@@ -2,6 +2,8 @@
     "name": "nmf-features-js",
     "main": "index.js",
     "dependencies": {
-        "machine_learning": "^0.1.1"
+        "machine_learning": "^0.1.1",
+        "webpack": "^5.17.0",
+        "webpack-dev-server": "^3.11.2"
     }
 }

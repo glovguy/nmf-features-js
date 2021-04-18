@@ -1,6 +1,7 @@
 const ml = require('machine_learning');
 const stopwords = require('./stopwords');
 
+
 function num_item_in_array(item, arr) {
     var count = 0;
     for (var i = 0; i < arr.length; ++i){
@@ -8,7 +9,6 @@ function num_item_in_array(item, arr) {
     }
     return count;
 }
-
 
 class Surveys {
     constructor(strArr,uuids) {
@@ -84,19 +84,52 @@ class Features {
     }
 
     print_features() {
+        console.log(this.features());
+    }
+
+    features() {
+        const resultFeatures = [];
         for (let i=0; i<this.num_features; i++) {
-            console.log(`\nImportant words for feature ${i}:`);
+            resultFeatures.push(`\nImportant words for feature ${i}:`);
             this.word_feature_weights(i).slice(0,6).forEach(weightPair => {
-                console.log(`\t${weightPair[1]} \t ${weightPair[0]}`);
+                resultFeatures.push(`\t${weightPair[1]} \t ${weightPair[0]}`);
             });
         }
         for (let i=0; i<this.num_features; i++) {
-            console.log(`\nImportant docs for feature ${i}:`);
+            resultFeatures.push(`\nImportant docs for feature ${i}:`);
             this.survey_feature_weights(i).slice(0,3).forEach(weightPair => {
                 const srvyText = this.surveys.srvys.find(s => s[0] == weightPair[1])[1];
-                console.log(`\t${srvyText} \n\t ${weightPair[0]}`);
+                resultFeatures.push(`\t${srvyText} \n\t ${weightPair[0]}`);
             });
         }
+        return resultFeatures.join('\n');
+    }
+    features_as_html() {
+        const resultStr = ['<hr />'];
+        for (let i=0; i<this.num_features; i++) {
+            // Important Words //
+
+            resultStr.push(`<h2>Feature ${i}</h2>`);
+            resultStr.push(`<h4>Important words for feature ${i}</h4>`);
+            resultStr.push('<table width="25%">');
+            resultStr.push(`<tr><th>Word</th><th>Weight</th></tr>`);
+            this.word_feature_weights(i).slice(0,6).forEach(weightPair => {
+                resultStr.push(`<tr><td>${weightPair[1]}</td><td>${weightPair[0]}</td></tr>`);
+            });
+            resultStr.push('</table>');
+
+            // Important Docs //
+            resultStr.push(`<h2>Feature ${i}</h2>`);
+            resultStr.push(`<h4>Important docs for feature ${i}</h4>`);
+            resultStr.push('<table width="25%">');
+            resultStr.push(`<tr><th>Filename</th><th>Weight</th></tr>`);
+            this.survey_feature_weights(i).slice(0,3).forEach(weightPair => {
+                const srvyUuid = this.surveys.srvys.find(s => s[0] == weightPair[1])[0];
+                resultStr.push(`<tr><td>${srvyUuid}</td><td>${weightPair[0]}</td></tr>`);
+            });
+            resultStr.push('</table> <hr />');
+        }
+        return resultStr.join('\n');
     }
 
     word_feature_weights(featureIndex) {

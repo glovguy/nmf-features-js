@@ -1,0 +1,80 @@
+<script src="dist/main.js"></script>
+<script>
+  const fileReaders = [];
+
+  function load_files() {
+    const fileInput = document.querySelector("#file-input");
+    for (let i=0; i<fileInput.files.length; i++) {
+      const reader = new window.FileReader();
+      const fileRaw = fileInput.files[i];
+
+      var li = document.createElement("li");
+      li.innerHTML = fileRaw.name;
+      li.id = `file-list-item-${fileReaders.length+1}`;
+      document.querySelector('#loaded-file-list').appendChild(li);
+
+      reader.onload = onSuccess(li.id);
+      reader.onabort = onFailure(li.id);
+
+      reader.readAsText(fileRaw);
+      reader.filename = fileRaw.name
+      fileReaders.push(reader);
+    }
+
+    fileInput.files = new DataTransfer().files;
+  };
+
+  function onSuccess(id) {
+    return function() {
+      const listItem = document.querySelector(`#${id}`);
+      listItem.innerHTML = "✓" + listItem.innerHTML;
+    }
+  }
+  function onFailure(id) {
+    return function() {
+      const listItem = document.querySelector(`#${id}`);
+      listItem.innerHTML = "✕" + listItem.innerHTML;
+    }
+  }
+
+  const analyze = () => {
+    const numFeatures = document.querySelector("#feature-count").value;
+    const surveyStrings = [];
+    const surveyUuids = [];
+
+    for (let i=0; i<fileReaders.length; i++) {
+      const reader = fileReaders[i];
+      if (!reader.DONE) { continue; }
+      surveyUuids.push(reader.filename);
+      surveyStrings.push(reader.result);
+    }
+    display_analysis(surveyStrings, surveyUuids, numFeatures);
+  }
+</script>
+<br /><br />
+
+<span>Note: no files leave the computer using this page</span>
+<br /><br />
+
+<input type="file" name="file-input" id="file-input" multiple ccept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><br />
+<script>
+  document.getElementById('file-input').onchange = load_files;
+</script>
+<br />
+<ol id="loaded-file-list"></ol>
+<br />
+<hr></hr>
+<br />
+<label for="feature-count">Number of features to extract: </label><input type="number" name="feature-count" id="feature-count" value="3"/><br />
+<button onclick="analyze()">Analyze!</button>
+<br /><br />
+
+<div>
+  <span id="analysis-output"></span>
+</div>
+
+<style>
+  table, th, td {
+    border: 1px solid black;
+  }
+</style>
